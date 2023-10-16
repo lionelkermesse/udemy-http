@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {Component, OnInit} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {flatMap, map, mergeMap} from "rxjs";
+import {Post} from "./post.model";
 
 @Component({
   selector: 'app-root',
@@ -7,19 +9,42 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  loadedPosts = [];
+  private readonly SERVER_ENDPOINT = 'https://udemy-angular-dbe7d-default-rtdb.europe-west1.firebasedatabase.app/';
 
-  constructor(private http: HttpClient) {}
+  loadedPosts: Post[] = [];
 
-  ngOnInit() {}
+  constructor(private http: HttpClient) {
+  }
+
+  ngOnInit() {
+  }
+
 
   onCreatePost(postData: { title: string; content: string }) {
     // Send Http request
-    console.log(postData);
+    this.http.post<{name: string}>(this.SERVER_ENDPOINT + 'posts.json', postData).subscribe(response => {
+      console.log('response', response);
+    });
   }
 
   onFetchPosts() {
     // Send Http request
+    this.http.get(this.SERVER_ENDPOINT + 'posts.json')
+      .pipe(
+        map((response) => {
+          const posts: Post[] = [];
+          for (const key in response) {
+            if(response.hasOwnProperty(key)) {
+              posts.push({...response[key], id: key});
+            }
+          }
+          return posts;
+        })
+      )
+      .subscribe(results => {
+        console.log('results', results);
+        this.loadedPosts = results
+      })
   }
 
   onClearPosts() {

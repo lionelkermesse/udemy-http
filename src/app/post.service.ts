@@ -15,7 +15,6 @@ export class PostService {
 
   fetchPosts = (): Observable<Post[]> =>
     // this.http.get<{[key: string], Post}>(this.POSTS_ENDPOINT)
-
     this.http.get(this.POSTS_ENDPOINT)
       .pipe(
         map((response) => {
